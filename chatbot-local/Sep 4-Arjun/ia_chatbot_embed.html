@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Impact Analytics AI Chatbot</title>
+   <link rel="icon" type="image/png" href="https://www.impactanalytics.co/wp-content/uploads/2021/02/cropped-Sidetab-2-2-32x32.png">
+   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" referrerpolicy="no-referrer" />
+   <style>
+       @keyframes gradientAnimation {
+           0% {
+               background-position: 0% 50%;
+           }
+           50% {
+               background-position: 100% 50%;
+           }
+           100% {
+               background-position: 0% 50%;
+           }
+       }
+
+       body {
+           margin: 0;   
+           padding: 0;
+           min-height: 100vh;
+           /* No background or animation, so it blends with the host website */
+       }
+
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+           font-family: "Inter" !important;
+       }
+       body {
+           font-family: "Inter" !important;
+       }
+       .ia-chatbot-widget,
+       .ia-chatbot-header,
+       .ia-header-content,
+       .ia-header-text,
+       .ia-message-content,
+       .ia-suggestion-btn,
+       .ia-input-area,
+       .ia-message.user .ia-message-content,
+       .ia-message.bot .ia-message-content {
+           font-family: "Inter" !important;
+       }
+
+       /* Wrap all chatbot styles inside a scoped selector */
+       #iaChatbotWidget, #iaChatbotWidget * {
+           box-sizing: border-box;
+           font-family: "Inter" !important;
+       }
+
+       #iaChatbotWidget {
+           position: fixed;
+           bottom: 20px;
+           right: 20px;
+           width: 400px;
+           height: 70vh;
+           background: #f5f5f5;
+           border-radius: 16px;
+           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+           display: flex;
+           flex-direction: column;
+           overflow: hidden;
+           z-index: 10000;
+           transition: transform 0.35s cubic-bezier(0.4,0.2,0.2,1), opacity 0.35s cubic-bezier(0.4,0.2,0.2,1);
+           transform: scale(1);
+           opacity: 1;
+           pointer-events: auto;
+       }
+
+       #iaChatbotWidget.minimized {
+           transform: scale(0.8);
+           opacity: 0;
+           pointer-events: none;
+       }
+
+       #iaChatbotWidget .ia-chatbot-header {
+           background: #264CD7;
+           color: white;
+           padding: 16px 20px 10px 20px;
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           cursor: pointer;
+           border-radius: 16px 16px 0 0;
+           box-shadow: 0 2px 8px rgba(74, 144, 226, 0.08);
+       }
+
+       #iaChatbotWidget .ia-header-content {
+           display: flex;
+           align-items: center;
+           gap: 10px;
+       }
+
+       #iaChatbotWidget .ia-bot-icon {
+           width: 36px;
+           height: 36px;
+           background: #eff5ff;
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           flex-shrink: 0;
+           overflow: hidden;
+       }
+
+       #iaChatbotWidget .ia-bot-icon img {
+           width: 32px;
+           height: 32px;
+           object-fit: contain;
+       }
+
+       #iaChatbotWidget .ia-header-text h3 {
+           font-size: 18px;
+           font-weight: 600;
+           margin: 0;
+           letter-spacing: 0.01em;
+       }
+
+       #iaChatbotWidget .ia-header-text p {
+           font-size: 13px;
+           margin: 0;
+           color: #43EE7D;
+           font-weight: 500;
+           padding-bottom: 0px !important;
+       }
+
+       #iaChatbotWidget .ia-minimize-btn {
+           background: none;
+           border: none;
+           color: white;
+           font-size: 22px;
+           cursor: pointer;
+           padding: 2px 8px;
+           border-radius: 50%;
+           transition: background 0.2s;
+           margin-left: 8px;
+       }
+
+       #iaChatbotWidget .ia-minimize-btn:hover {
+           background: rgba(255,255,255,0.12);
+       }
+
+       #iaChatbotWidget .ia-chat-area {
+           flex: 1;
+           padding: 24px 16px 0 16px;
+           overflow-y: auto;
+           overflow-x: hidden;
+           display: flex;
+           flex-direction: column;
+           gap: 10px;
+           background: #f7fafd;
+           word-wrap: break-word;
+           word-break: break-word;
+       }
+
+       #iaChatbotWidget.minimized .ia-chat-area {
+           display: none;
+       }
+
+       #iaChatbotWidget .ia-message {
+           display: flex;
+           gap: 10px;
+           align-items: flex-start;
+           margin-bottom: -4px;
+       }
+
+       #iaChatbotWidget .ia-message-avatar {
+           align-self: flex-start;
+           margin-top: 0;
+           margin-bottom: 0;
+           width: 28px;
+           height: 28px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           border-radius: 50%;
+           background: #264CD7;
+           min-width: 28px !important;
+       }
+
+       #iaChatbotWidget .ia-message.user {
+           flex-direction: row-reverse;
+           justify-content: flex-start;
+           text-align: right;
+       }
+
+       #iaChatbotWidget .ia-message.user .ia-message-content {
+           background: #DEE2E6;
+           color: #1C1B1B;
+           border-radius: 16px 16px 4px 16px;
+           margin-left: 8px;
+           margin-right: 0;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+           font-size: 15px;
+           padding: 10px;
+           max-width: 100%;
+           word-wrap: break-word;
+           word-break: break-word;
+           line-height: 1.2 !important;
+           text-align: left;
+       }
+
+       #iaChatbotWidget .ia-message.user .ia-message-avatar {
+           background: #e0e0e0;
+           color: #666;
+           font-size: 13px;
+           font-weight: 600;
+           width: 28px;
+           height: 28px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           border-radius: 50%;
+       }
+
+       #iaChatbotWidget .ia-message.bot {
+           flex-direction: row;
+           justify-content: flex-start;
+           text-align: left;
+       }
+
+       #iaChatbotWidget .ia-message.bot .ia-message-content {
+           background: #B3C9F7;
+           color: #1C1B1B;
+           border-radius: 4px 16px 16px 16px;
+           margin-right: 8px;
+           margin-left: 0;
+           font-size: 15px;
+           padding: 10px;
+           line-height: 1.2 !important;
+       }
+
+       #iaChatbotWidget .ia-message.bot .ia-message-content a {
+           color: #1C1B1B;
+           text-decoration: underline;
+           transition: color 0.2s;
+       }
+
+       #iaChatbotWidget .ia-message.bot .ia-message-content a:hover {
+           color: #ffffff;
+       }
+
+       #iaChatbotWidget .ia-message.bot .ia-message-avatar img {
+           width: 26px;
+           height: 26px;
+           border-radius: 50%;
+           display: block;
+       }
+
+       #iaChatbotWidget .ia-message-content {
+           padding: 10px 14px;
+           border-radius: 16px;
+           font-size: 15px;
+           line-height: 1.4;
+           background: #264F99;
+           color: #fff;
+           margin: 0;
+       }
+
+       #iaChatbotWidget .ia-suggested-actions {
+           display: flex;
+           gap: 8px;
+           margin-top: 0px;
+           padding: 10px 16px;
+           justify-content: space-between;
+           align-items: center;
+       }
+
+       #iaChatbotWidget .ia-suggestion-btn {
+        background: #f5f5f5;
+        border: 1px solid #F26922;
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #F26922;
+        cursor: pointer;
+        transition: background 0.2s, border 0.2s;
+        text-decoration: none;
+        line-height: 1.2;
+       }
+
+       #iaChatbotWidget .ia-suggestion-btn:hover {
+        background: #F26922;
+    border-color: #F26922;
+    color: white;
+       }
+
+       #iaChatbotWidget .ia-input-area {
+           padding: 12px 10px;
+           background: #fff;
+           border-top: 1px solid #e0e0e0;
+           display: flex;
+           align-items: center;
+           gap: 10px;
+       }
+
+       #iaChatbotWidget.minimized .ia-input-area {
+           display: none;
+       }
+
+       #iaChatbotWidget .ia-input-container {
+           flex: 1;
+           position: relative;
+       }
+
+       #iaChatbotWidget .ia-message-input {
+           width: 100%;
+           padding: 10px 44px 10px 14px !important;
+           border: 1px solid #e0e0e0;
+           border-radius: 12px;
+           font-size: 14px;
+           background: #f7fafd;
+           line-height: 1.4 !important;
+           min-height: 36px;
+           max-height: 120px;
+           resize: none;
+           overflow: hidden;
+           box-sizing: border-box;
+           transition: min-height 0.2s;
+       }
+
+       input#iaMessageInput::placeholder {
+    color: #73859f !important;
+}
+       #iaChatbotWidget .ia-send-btn {
+           position: absolute;
+           right: 4px;
+           top: -4px !important;
+           bottom: 0;
+           margin: auto 0;
+           height: 32px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           background: #ff7a2f;
+           border: none;
+           width: 32px;
+           border-radius: 50%;
+           color: white;
+           cursor: pointer;
+           font-size: 16px;
+       }
+
+       #iaChatbotWidget .ia-send-btn:hover {
+           background: #ff9a5c;
+       }
+
+       #iaChatbotWidget .ia-chat-area::-webkit-scrollbar {
+           width: 4px;
+       }
+
+       #iaChatbotWidget .ia-chat-area::-webkit-scrollbar-track {
+           background: transparent;
+       }
+
+       #iaChatbotWidget .ia-chat-area::-webkit-scrollbar-thumb {
+           background: #ccc;
+           border-radius: 2px;
+       }
+
+       #iaChatbotWidget .ia-typing-indicator {
+           display: flex;
+           gap: 4px;
+           padding: 8px;
+       }
+
+       #iaChatbotWidget .ia-typing-dot {
+           width: 6px;
+           height: 6px;
+           background: rgba(255, 255, 255, 0.7);
+           border-radius: 50%;
+           animation: typing 1.4s infinite;
+       }
+
+       #iaChatbotWidget .ia-typing-dot:nth-child(2) {
+           animation-delay: 0.2s;
+       }
+
+       #iaChatbotWidget .ia-typing-dot:nth-child(3) {
+           animation-delay: 0.4s;
+       }
+
+       .ia-chatbot-widget i[class*=fa-]{
+            top: 0px !important;
+        }
+        .ia-tooltip-close-btn  i[class*=fa-]{
+            top: 0px !important;
+        }
+
+       @keyframes typing {
+           0%, 60%, 100% {
+               transform: translateY(0);
+           }
+           30% {
+               transform: translateY(-10px);
+           }
+       }
+
+       #iaChatbotWidget .source-links-container {
+           margin-top: 10px;
+           border-top: 1px solid rgba(255, 255, 255, 0.2);
+           padding-top: 10px;
+       }
+
+       #iaChatbotWidget .source-links-title {
+           font-size: 13px;
+           font-weight: 600;
+           margin-bottom: 8px;
+           color: rgba(255, 255, 255, 0.9);
+           display: flex;
+           align-items: center;
+       }
+
+       #iaChatbotWidget .source-links-title i {
+           margin-right: 6px;
+       }
+
+       #iaChatbotWidget .source-links-list {
+           display: flex;
+           flex-direction: column;
+           gap: 6px;
+           max-height: 0;
+           opacity: 0;
+           overflow: hidden;
+           transition: max-height 0.4s cubic-bezier(0.4,0.2,0.2,1), opacity 0.4s cubic-bezier(0.4,0.2,0.2,1);
+       }
+       #iaChatbotWidget .source-links-list.open {
+           max-height: 500px;
+           opacity: 1;
+       }
+
+       #iaChatbotWidget .source-link-item {
+           background: rgba(255, 255, 255, 0.1);
+           border-radius: 8px;
+           padding: 8px 12px;
+           font-size: 13px;
+           transition: all 0.2s ease;
+           display: flex;
+           align-items: center;
+           text-decoration: none;
+           color: white;
+           overflow: hidden;
+           text-overflow: ellipsis;
+           white-space: nowrap;
+           max-width: 100%;
+       }
+
+       #iaChatbotWidget .source-link-item:hover {
+           background: rgba(255, 255, 255, 0.2);
+           transform: translateY(-2px);
+       }
+
+       #iaChatbotWidget .source-link-item i {
+           margin-right: 8px;
+           font-size: 14px;
+       }
+
+       #iaChatbotWidget .ia-feedback {
+           display: flex;
+           gap: 6px;
+           align-items: center;
+           margin: 0px 0 0 0;
+       }
+
+       #iaChatbotWidget .ia-like-btn, #iaChatbotWidget .ia-dislike-btn {
+           background: transparent;
+           border: 0px solid #e0e0e0;
+           border-radius: 50%;
+           width: 20px;
+           height: 20px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: #99c3ea;
+           cursor: pointer;
+           font-size: 15px;
+           transition: background 0.2s, border 0.2s, color 0.2s;
+           outline: none;
+           margin: 0;
+       }
+
+       #iaChatbotWidget .ia-like-btn {
+           margin-right: 0;
+       }
+
+       #iaChatbotWidget .ia-dislike-btn {
+           margin-left: 0;
+       }
+
+       #iaChatbotWidget .ia-like-btn i, #iaChatbotWidget .ia-dislike-btn i {
+           vertical-align: middle;
+       }
+
+       #iaChatbotWidget .ia-like-btn.active, #iaChatbotWidget .ia-like-btn:hover {
+           background: transparent;
+           color: #264F99;
+           border-color: #264F99;
+       }
+
+       #iaChatbotWidget .ia-dislike-btn.active, #iaChatbotWidget .ia-dislike-btn:hover {
+           background: #ffeded;
+           color: #ff4d4f;
+           border-color: #ff4d4f;
+       }
+
+       #iaChatbotWidget .ia-meta-row {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           gap: 8px;
+           max-width: 100%;
+           margin-left: 0px;
+           margin-top: -10px;
+           margin-bottom: 8px;
+       }
+
+       #iaChatbotWidget .ia-message.bot .ia-message-content {
+           margin-bottom: 2px !important;
+       }
+
+       #iaChatbotWidget .ia-message.bot {
+           margin-bottom: 0px !important;
+       }
+
+       #iaChatbotWidget .ia-message-timestamp {
+           font-size: 11px;
+           color: #bdbdbd;
+           text-align: right;
+           user-select: none;
+           margin: 0;
+       }
+
+       #iaChatbotWidget .ia-reset-btn {
+           background: #fff;
+           border: 1px solid #e0e0e0;
+           border-radius: 50%;
+           width: 28px;
+           height: 28px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: #888;
+           margin-left: 8px;
+           cursor: pointer;
+           font-size: 15px;
+           transition: background 0.2s, border 0.2s, color 0.2s;
+       }
+
+       #iaChatbotWidget .ia-reset-btn:hover {
+           background: #e8f1fa;
+           color: #4A90E2;
+           border-color: #4A90E2;
+       }
+
+       #iaFloatBtn {
+           position: fixed;
+           bottom: 20px;
+           right: 20px;
+           width: 50px;
+           height: 50px;
+           /* background: white; */
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           cursor: pointer;
+           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+           z-index: 9999;
+           border: 0px solid #f0f0f0;
+           display: block !important;
+       }
+
+        .grecaptcha-badge{
+            display: none !important;
+        }
+        
+       #iaFloatBtn img {
+           width: 50px;
+           height: 50px;
+           object-fit: contain;
+       }
+
+       #iaFloatBtn:not(.show) {
+           display: none !important;
+       }
+
+       #iaRecaptchaError {
+           display: none;
+           color: #ff4d4f;
+           background: #fff3f3;
+           padding: 10px 16px;
+           border-radius: 10px 10px 0 0;
+           font-size: 14px;
+           font-weight: 500;
+           text-align: center;
+           position: absolute;
+           top: 0;
+           left: 0;
+           right: 0;
+           z-index: 10001;
+           box-shadow: 0 2px 8px rgba(255,77,79,0.08);
+       }
+       .ia-header-text h3 {
+           color: white !important;
+           line-height: 1.2 !important;
+       }
+
+       /* Font Awesome icon fix for scoped CSS */
+       #iaChatbotWidget i.fas,
+       #iaChatbotWidget i.far,
+       #iaChatbotWidget i.fab,
+       #iaChatbotWidget i.fa-solid,
+       #iaChatbotWidget i.fa-regular,
+       #iaChatbotWidget i.fa-brands {
+           font-family: "Inter" !important;
+           font-weight: 900 !important;
+       }
+
+       /* Responsive styles */
+       @media screen and (max-width: 768px) {
+           #iaChatbotWidget {
+               width: calc(100% - 40px);
+               height: calc(100% - 40px);
+               bottom: 20px;
+               right: 20px;
+               max-width: 400px;
+               max-height: 70%;
+           }
+
+           #iaChatbotWidget .ia-chatbot-header {
+               padding: 12px 16px 8px 16px;
+           }
+
+           #iaChatbotWidget .ia-header-text h3 {
+               font-size: 16px;
+           }
+
+           #iaChatbotWidget .ia-header-text p {
+               font-size: 12px;
+           }
+
+           #iaChatbotWidget .ia-bot-icon {
+               width: 32px;
+               height: 32px;
+           }
+
+           #iaChatbotWidget .ia-bot-icon img {
+               width: 28px;
+               height: 28px;
+           }
+
+           #iaChatbotWidget .ia-message-content {
+               font-size: 14px;
+               padding: 8px;
+           }
+
+           #iaChatbotWidget .ia-suggested-actions {
+               flex-wrap: wrap;
+               gap: 6px;
+               padding: 8px;
+           }
+
+           #iaChatbotWidget .ia-suggestion-btn {
+               font-size: 11px;
+               padding: 6px 12px;
+           }
+
+           #iaChatbotWidget .ia-input-area {
+               padding: 8px 10px;
+           }
+
+           #iaChatbotWidget .ia-message-input {
+               font-size: 13px;
+               padding: 8px 36px 8px 12px !important;
+           }
+
+           #iaChatbotWidget .ia-send-btn {
+               width: 28px;
+               height: 28px;
+           }
+
+           #iaFloatBtn {
+               width: 45px;
+               height: 45px;
+               bottom: 15px;
+               right: 15px;
+           }
+
+           #iaFloatBtn img {
+               width: 50px;
+               height: 50px;
+           }
+       }
+
+       @media screen and (max-width: 480px) {
+           #iaChatbotWidget {
+               width: calc(100% - 20px);
+               height: calc(100% - 20px);
+               bottom: 10px;
+               right: 10px;
+               border-radius: 12px;
+           }
+
+           #iaChatbotWidget .ia-chatbot-header {
+               padding: 10px 14px 6px 14px;
+               border-radius: 12px 12px 0 0;
+           }
+
+           #iaChatbotWidget .ia-header-text h3 {
+               font-size: 15px;
+           }
+
+           #iaChatbotWidget .ia-bot-icon {
+               width: 28px;
+               height: 28px;
+           }
+
+           #iaChatbotWidget .ia-bot-icon img {
+               width: 24px;
+               height: 24px;
+           }
+
+           #iaChatbotWidget .ia-message-content {
+               font-size: 13px;
+               padding: 6px;
+           }
+
+           #iaChatbotWidget .ia-suggested-actions {
+               padding: 6px;
+           }
+
+           #iaChatbotWidget .ia-suggestion-btn {
+               font-size: 12px;
+               padding: 5px 10px;
+           }
+
+           #iaChatbotWidget .ia-input-area {
+               padding: 6px 10px;
+           }
+
+           #iaChatbotWidget .ia-message-input {
+            font-size: 16px;
+            padding: 12px 32px 12px 10px !important;
+           }
+
+           #iaChatbotWidget .ia-send-btn {
+               width: 34px;
+               height: 34px;
+               right: 3px;
+           }
+
+           #iaFloatBtn {
+               width: 40px;
+               height: 40px;
+               bottom: 30px;
+               right: 30px;
+           }
+
+           #iaFloatBtn img {
+               width: 50px;
+               height: 50px;
+           }
+       }
+       /* Tooltip styles */
+       #iaChatbotTooltipIcon {
+           position: fixed;
+           bottom: 160px;
+           right: 160px;
+           width: 48px;
+           height: 48px;
+           border-radius: 50%;
+           /* background: linear-gradient(135deg, #2BC0EE, #6767EF); */
+           background: #264CD7;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           z-index: 9999;
+           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+           opacity: 0;
+           transform: translateY(10px);
+           transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+           cursor: pointer;
+       }
+
+       #iaChatbotTooltipIcon img {
+           width: 44px;
+           height: 44px;
+           object-fit: contain;
+       }
+
+       #iaChatbotTooltip {
+           position: fixed;
+           bottom: 90px;
+           right: 30px;
+           width: 300px;
+           background: #ffffff;
+           border-radius: 22px;
+           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+           padding: 15px;
+           z-index: 9998;
+           display: none;
+           font-family: "Inter" !important;
+           color: #333;
+           line-height: 1.4;
+           text-align: center;
+           opacity: 0;
+           transform: translateY(10px);
+           transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+           cursor: pointer;
+       }
+
+       #iaChatbotTooltip::before {
+           content: '';
+           position: absolute;
+           inset: 0;
+           border-radius: 22px;
+           padding: 2px;
+           background: linear-gradient(135deg, #2BC0EE, #6767EF);
+           -webkit-mask: 
+               linear-gradient(#fff 0 0) content-box, 
+               linear-gradient(#fff 0 0);
+           -webkit-mask-composite: xor;
+           mask-composite: exclude;
+           pointer-events: none;
+       }
+
+       #iaChatbotTooltip.show, #iaChatbotTooltipIcon.show {
+           opacity: 1;
+           transform: translateY(0);
+           animation: tooltipPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 1;
+       }
+
+       @keyframes tooltipPop {
+           0% {
+               transform: scale(0.8) translateY(20px);
+               opacity: 0;
+               box-shadow: 0 0 0 0 rgba(46,192,238,0.3);
+           }
+           60% {
+               transform: scale(1.08) translateY(-4px);
+               opacity: 1;
+               box-shadow: 0 0 16px 4px rgba(46,192,238,0.18);
+           }
+           80% {
+               transform: scale(0.97) translateY(0);
+               box-shadow: 0 0 8px 2px rgba(46,192,238,0.10);
+           }
+           100% {
+               transform: scale(1) translateY(0);
+               box-shadow: 0 0 0 0 rgba(46,192,238,0);
+           }
+       }
+
+       #iaChatbotTooltip .ia-tooltip-text {
+           font-size: 15px;
+           margin-top: 10px;
+           margin-bottom: 0;
+           padding-right: 0px;
+           position: relative;
+           z-index: 1;
+           padding-bottom: 10px !important;
+       }
+
+       #iaChatbotTooltip .ia-tooltip-text b {
+           font-weight: 700;
+           color: #4E77FF;
+       }
+
+       #iaChatbotTooltip .ia-tooltip-close-btn {
+           position: absolute;
+           top: -30px;
+           right: 0px;
+           background: #75779D;
+           border: none;
+           font-size: 20px;
+           color: #ffffff;
+           cursor: pointer;
+           padding: 4px;
+           transition: all 0.2s;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           width: 24px;
+           height: 24px;
+           border-radius: 50%;
+           z-index: 2;
+       }
+
+       #iaChatbotTooltip .ia-tooltip-close-btn:hover {
+           background: #5a5b7d;
+       }
+
+       /* Responsive styles for tooltip */
+       @media screen and (max-width: 480px) {
+           #iaChatbotTooltip {
+               width: calc(100% - 60px); /* Adjust for smaller screens */
+               right: 30px;
+               bottom: 80px; /* Adjust based on new float button position */
+           }
+           #iaChatbotTooltipIcon {
+               bottom: 140px; /* Adjust based on new tooltip position */
+               right: calc(30px + (100% - 60px) / 2 - 24px); /* Recalculate horizontal center */
+           }
+       }
+
+       #iaChatbotWidget .ia-message-content-row {
+           /* display: flex; */
+           align-items: flex-start;
+           gap: 8px;
+       }
+
+       #iaChatbotWidget .ia-message-actions-row {
+           display: flex;
+           align-items: center;
+           justify-content: space-between;
+           margin: 0px 0 0 0;
+           gap: 8px;
+       }
+
+       #iaChatbotWidget .ia-meta-row {
+           margin: 0;
+           font-size: 11px;
+           color: #bdbdbd;
+       }
+
+       #iaChatbotWidget .source-toggle-icon {
+           margin-left: 6px;
+           margin-top: 3px;
+           transition: transform 0.3s cubic-bezier(0.4,0.2,0.2,1), color 0.3s;
+           vertical-align: middle;
+       }
+
+       .ia-message-content ul {
+        padding-top: 10px !important;
+        margin-bottom: 10px !important;
+        }
+        .ia-message-content p {
+            padding-bottom: 0px !important;
+        }
+   </style>
+</head>
+<body>
+   <!-- Float Button -->
+   <div class="ia-float-btn" id="iaFloatBtn">
+       <img src="https://www.impactanalytics.co/wp-content/uploads/2025/06/Chatbot-icon.webp" alt="Chat with IA" />
+   </div>
+
+   <!-- Tooltip Icon -->
+   <div id="iaChatbotTooltipIcon">
+       <img src="https://www.impactanalytics.co/wp-content/uploads/2025/10/impact-chat2.png" alt="IA Bot" />
+   </div>
+
+   <!-- Tooltip -->
+   <div id="iaChatbotTooltip">
+        <button class="ia-tooltip-close-btn"><i class="fas fa-xmark"></i></button>
+        <p class="ia-tooltip-text">Hi there! I'm your <b>IA Digital Agent</b> – here to help you know more about us.</p>
+   </div>
+
+   <div id="iaRecaptchaError" style="display:none;color:#ff4d4f;background:#fff3f3;padding:10px 16px;border-radius:10px 10px 0 0;font-size:14px;font-weight:500;text-align:center;position:absolute;top:0;left:0;right:0;z-index:10001;box-shadow:0 2px 8px rgba(255,77,79,0.08);">
+        reCAPTCHA verification failed. Please refresh the page or try again later.
+    </div>
+
+   <!-- Chatbot Widget -->
+   <div class="ia-chatbot-widget" id="iaChatbotWidget">
+       <!-- Header -->
+       <div class="ia-chatbot-header" id="iaChatbotHeader">
+           <div class="ia-header-content">
+               <div class="ia-bot-icon">
+                   <img src="https://www.impactanalytics.co/wp-content/uploads/2025/10/impact-chat2.png" alt="IA Bot" />
+               </div>
+               <div class="ia-header-text">
+                   <h3>IA Digital Agent</h3>
+                   <p><span style="color:#00e676;font-size:14px;vertical-align:middle;">●</span> Online</p>
+               </div>
+           </div>
+           <button class="ia-minimize-btn" id="iaMinimizeBtn">−</button>
+       </div>
+
+
+       <!-- Chat Area -->
+       <div class="ia-chat-area" id="iaChatArea">
+           <!-- Welcome Message -->
+           <div class="ia-message bot">
+               <div class="ia-message-avatar">
+                   <img src="https://www.impactanalytics.co/wp-content/uploads/2025/10/impact-chat2.png" alt="IA Bot" style="width:26px;height:26px;" />
+               </div>
+               <div class="ia-message-content-row">
+                   <div class="ia-message-content">
+                       Hi there! I'm your IA Digital Agent – here to help you know more about us.
+                   </div>
+               </div>
+           </div>
+           <div class="ia-message bot">
+               <div class="ia-message-avatar">
+                   <img src="https://www.impactanalytics.co/wp-content/uploads/2025/10/impact-chat2.png" alt="IA Bot" style="width:26px;height:26px;" />
+               </div>
+               <div class="ia-message-content-row">
+                   <div class="ia-message-content" style="margin-left: 0;">
+                       How can I assist you today?
+                   </div>
+               </div>
+           </div>
+       </div>
+       <!-- Suggested Actions -->
+       <div class="ia-suggested-actions">
+           <div style="display: flex; gap: 8px;">
+               <a class="ia-suggestion-btn" href="https://www.impactanalytics.co/request-demo/" target="_blank" style="display: none;">Request a Demo</a>
+               <a class="ia-suggestion-btn" href="https://www.impactanalytics.co/contact-us/" target="_blank">Talk to an Expert</a>
+           </div>
+           <button class="ia-reset-btn" title="Reset chat" onclick="window.iaChatbot && window.iaChatbot.resetChat()">
+               <i class="fas fa-rotate-left"></i>
+           </button>
+       </div>
+       <!-- Input Area -->
+       <div class="ia-input-area">
+           <div class="ia-input-container">
+               <textarea
+                   class="ia-message-input"
+                   placeholder="Type your message here..."
+                   id="iaMessageInput"
+                   maxlength="1000"
+                   rows="1"
+                   style="resize: none; overflow: hidden; min-height: 36px; max-height: 120px;"
+               ></textarea>
+               <button class="ia-send-btn" id="iaSendBtn">
+                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                       <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                   </svg>
+               </button>
+           </div>
+       </div>
+   </div>
+</body>
+</html>

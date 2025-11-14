@@ -1,0 +1,38 @@
+<!-- templates/index.html -->
+<html>
+<head>
+    <title>FastAPI HTML Page</title>
+</head>
+<body>
+    <h1>Hello Shridhar kagi</h1>
+    <!-- Custom Chatbot Integration -->
+<div id="chatbot-container"></div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=6LeG1VYrAAAAAKHi-bXkp7U1qUVxePNR4HlObA4-"></script>
+<script src="/static/js/render_iabot.js"></script>
+<script src="https://www.impactanalytics.co/wp-content/themes/salient-child/js/chatbot-formatter.js"></script>
+<!-- Chatbot FontAwesome Fix -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Check repeatedly until the chatbot is present in the DOM
+  const checkBot = setInterval(() => {
+    const botContainer = document.querySelector("#chatbot-container iframe, #chatbot-container div");
+    if (botContainer) {
+      clearInterval(checkBot);
+
+      // Inject CSS AFTER chatbot loads
+      const style = document.createElement("style");
+      style.innerHTML = `
+        .fa-xmark:before {
+          font-family: "FontAwesome" !important;
+        }
+      `;
+      document.head.appendChild(style);
+      console.log("✅ Chatbot icon fix applied");
+    }
+  }, 1000); // checks every second
+});
+</script>
+<!-- End Chatbot FontAwesome Fix -->
+</body>
+</html>
